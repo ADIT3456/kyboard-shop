@@ -10,7 +10,7 @@
 
 <br>
 
-[![Live Preview](https://img.shields.io/badge/Live_Preview-View_Pages-2EA043?style=for-the-badge&logo=github)](Masukkan_Link_Pages_Disini)
+[![Live Preview](https://img.shields.io/badge/Live_Preview-View_Pages-2EA043?style=for-the-badge&logo=github)](https://adit3456.github.io/kyboard-shop/)
 
 ---
 
