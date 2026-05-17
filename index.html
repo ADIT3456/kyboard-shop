@@ -1,0 +1,165 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Key Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-white text-black font-sans antialiased">
+<div id="app" class="min-h-screen flex flex-col">
+    
+    <nav class="bg-black text-white sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="font-bold text-2xl tracking-tight">AR Key Studio.</a>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="font-semibold border-b-2 border-white px-1 py-2">Home</a>
+                    <a href="brand.html" class="text-gray-300 hover:text-white transition-colors px-1 py-2">Brand</a>
+                    <a href="collection.html" class="text-gray-300 hover:text-white transition-colors px-1 py-2">Collection</a>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-4">
+                    <template v-if="!isLoggedIn">
+                        <button @click="showLoginModal = true" class="bg-white text-black font-bold py-2 px-6 rounded hover:bg-gray-200 transition-colors">Login</button>
+                    </template>
+                    <template v-else>
+                        <span class="text-sm">Hi, <span class="font-bold">{{ username }}</span></span>
+                        <button @click="logout" class="border border-white text-white hover:bg-white hover:text-black font-bold py-1.5 px-4 rounded transition-colors text-sm">Logout</button>
+                    </template>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-white hover:text-gray-300 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="mobileMenuOpen" class="md:hidden bg-gray-900 border-t border-gray-800">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-black">Home</a>
+                <a href="brand.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-black">Brand</a>
+                <a href="collection.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-black">Collection</a>
+                
+                <div class="pt-4 pb-2 border-t border-gray-800 mt-2">
+                    <template v-if="!isLoggedIn">
+                        <button @click="showLoginModal = true; mobileMenuOpen = false" class="block w-full bg-white text-black font-bold px-3 py-2 rounded-md text-left">Login</button>
+                    </template>
+                    <template v-else>
+                        <div class="px-3 py-2 text-sm text-gray-300">User: <span class="text-white font-bold">{{ username }}</span></div>
+                        <button @click="logout; mobileMenuOpen = false" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium border border-gray-600 mt-2 hover:bg-gray-800">Logout</button>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 flex flex-col items-center text-center">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">Keyboard <br>shop</h1>
+            <p class="text-xl text-gray-600 mb-10 max-w-2xl">Eksplorasi mechanical keyboard minimalis dengan performa maksimal. Tanpa distraksi, murni produktivitas dan estetika.</p>
+            <a href="collection.html" class="bg-black text-white px-8 py-4 rounded font-bold hover:bg-gray-800 transition-colors text-lg">Mulai Belanja</a>
+        </section>
+
+        <section class="bg-gray-50 py-20 border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">1</div>
+                        <h3 class="text-xl font-bold mb-2">Desain Monokrom</h3>
+                        <p class="text-gray-600">Cocok untuk setup minimalis modern yang mengutamakan kebersihan visual.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">2</div>
+                        <h3 class="text-xl font-bold mb-2">Durabilitas Tinggi</h3>
+                        <p class="text-gray-600">Material PBT dan Frame Aluminium yang dirancang untuk penggunaan bertahun-tahun.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">3</div>
+                        <h3 class="text-xl font-bold mb-2">Presisi Akurat</h3>
+                        <p class="text-gray-600">Dukungan N-Key Rollover memastikan setiap ketikan terdaftar tanpa terlewat.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-black text-white py-8 text-center">
+        <p class="text-gray-400 text-sm">© 2026 AR Key Studio.</p>
+    </footer>
+
+    <div v-if="showLoginModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-70 px-4">
+        <div class="bg-white rounded-lg w-full max-w-md p-8 relative">
+            <button @click="showLoginModal = false" class="absolute top-4 right-4 text-gray-500 hover:text-black font-bold text-xl">✕</button>
+            <h2 class="text-2xl font-bold mb-6 text-center text-black">Login Akun</h2>
+            <form @submit.prevent="login">
+                <div class="mb-6">
+                    <label class="block text-black text-sm font-bold mb-2">Username</label>
+                    <input v-model="loginInput" type="text" required class="w-full border border-gray-300 text-black px-4 py-3 rounded focus:outline-none focus:border-black focus:ring-1 focus:ring-black" placeholder="Masukkan username">
+                </div>
+                <button type="submit" class="w-full bg-black text-white font-bold py-3 rounded hover:bg-gray-800 transition-colors">Masuk</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const { createApp } = Vue;
+    createApp({
+        data() {
+            return {
+                mobileMenuOpen: false,
+                isLoggedIn: false,
+                username: '',
+                showLoginModal: false,
+                loginInput: ''
+            }
+        },
+        mounted() {
+            const savedUser = localStorage.getItem('arkey_user');
+            if (savedUser) {
+                this.username = savedUser;
+                this.isLoggedIn = true;
+            }
+        },
+        methods: {
+            login() {
+                if (this.loginInput.trim() !== '') {
+                    localStorage.setItem('arkey_user', this.loginInput);
+                    this.username = this.loginInput;
+                    this.isLoggedIn = true;
+                    this.showLoginModal = false;
+                    this.loginInput = '';
+                }
+            },
+            logout() {
+                localStorage.removeItem('arkey_user');
+                this.username = '';
+                this.isLoggedIn = false;
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>

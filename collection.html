@@ -1,0 +1,271 @@
+<!-- collection.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collection - AR Key Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="bg-white text-black font-sans antialiased">
+<div id="app" class="min-h-screen flex flex-col relative">
+    
+    <nav class="bg-black text-white sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="font-bold text-2xl tracking-tight">AR Key Studio.</a>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-gray-300 hover:text-white transition-colors px-1 py-2">Home</a>
+                    <a href="brand.html" class="text-gray-300 hover:text-white transition-colors px-1 py-2">Brand</a>
+                    <a href="collection.html" class="font-semibold border-b-2 border-white px-1 py-2">Collection</a>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-4">
+                    <template v-if="!isLoggedIn">
+                        <button @click="showLoginModal = true" class="bg-white text-black font-bold py-2 px-6 rounded hover:bg-gray-200 transition-colors">Login</button>
+                    </template>
+                    <template v-else>
+                        <span class="text-sm">Hi, <span class="font-bold">{{ username }}</span></span>
+                        <button @click="logout" class="border border-white text-white hover:bg-white hover:text-black font-bold py-1.5 px-4 rounded transition-colors text-sm">Logout</button>
+                    </template>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-white hover:text-gray-300 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="mobileMenuOpen" class="md:hidden bg-gray-900 border-t border-gray-800">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-black">Home</a>
+                <a href="brand.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-black">Brand</a>
+                <a href="collection.html" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-black">Collection</a>
+                
+                <div class="pt-4 pb-2 border-t border-gray-800 mt-2">
+                    <template v-if="!isLoggedIn">
+                        <button @click="showLoginModal = true; mobileMenuOpen = false" class="block w-full bg-white text-black font-bold px-3 py-2 rounded-md text-left">Login</button>
+                    </template>
+                    <template v-else>
+                        <div class="px-3 py-2 text-sm text-gray-300">User: <span class="text-white font-bold">{{ username }}</span></div>
+                        <button @click="logout; mobileMenuOpen = false" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium border border-gray-600 mt-2 hover:bg-gray-800">Logout</button>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h1 class="text-3xl font-extrabold uppercase">Katalog</h1>
+            
+            <div class="w-full md:w-80 relative">
+                <input 
+                    type="text" 
+                    v-model="searchQuery" 
+                    placeholder="Cari keyboard..." 
+                    class="w-full bg-white border-2 border-black text-black px-4 py-2 font-medium focus:outline-none focus:ring-0 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                >
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-10 border-b-2 border-black pb-6">
+            <button 
+                @click="selectedBrand = 'All'"
+                :class="selectedBrand === 'All' ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+                class="border-2 border-black px-4 py-1.5 font-bold text-sm uppercase transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-none"
+            >
+                Semua
+            </button>
+            <button 
+                v-for="brandName in availableBrands" 
+                :key="brandName"
+                @click="selectedBrand = brandName"
+                :class="selectedBrand === brandName ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-100'"
+                class="border-2 border-black px-4 py-1.5 font-bold text-sm uppercase transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-none"
+            >
+                {{ brandName }}
+            </button>
+        </div>
+
+        <div v-if="filteredProducts.length === 0" class="text-center py-20 font-bold text-gray-500">
+            Produk tidak ditemukan.
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div v-for="product in filteredProducts" :key="product.id" class="bg-white border-2 border-black flex flex-col shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all">
+                <div class="h-48 overflow-hidden border-b-2 border-black">
+                    <img :src="product.image" :alt="product.name" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-300">
+                </div>
+                <div class="p-5 flex flex-col flex-grow">
+                    <div class="text-[10px] font-black uppercase text-gray-500 mb-1">{{ product.brand }}</div>
+                    <h3 class="text-sm font-bold text-black mb-2 leading-snug line-clamp-2 h-10">{{ product.name }}</h3>
+                    <p class="text-black font-extrabold text-lg mt-auto mb-4">{{ formatPrice(product.price) }}</p>
+                    <button @click="openModal(product)" class="w-full bg-black text-white hover:bg-white hover:text-black border-2 border-black font-bold py-2 transition-colors uppercase text-sm tracking-wider">
+                        Beli
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-black text-white py-8 text-center mt-auto">
+        <p class="text-gray-400 text-sm">© 2026 AR Key Studio.</p>
+    </footer>
+
+    <div v-if="showPaymentModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-80 px-4 backdrop-blur-sm">
+        <div class="bg-white border-4 border-black w-full max-w-md p-8 relative shadow-[8px_8px_0px_0px_rgba(255,255,255,1)]">
+            <button @click="closePaymentModal" class="absolute top-4 right-4 text-black hover:text-gray-600 font-bold text-xl">✕</button>
+            <h2 class="text-2xl font-extrabold mb-6 border-b-2 border-black pb-2 uppercase tracking-wide">Pembayaran</h2>
+            
+            <div class="mb-4">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Produk</p>
+                <p class="font-bold text-black text-lg">{{ selectedProduct.name }}</p>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Harga Satuan</p>
+                <p class="font-extrabold text-black">{{ formatPrice(selectedProduct.price) }}</p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kuantitas</label>
+                <input type="number" v-model="quantity" min="1" class="w-full bg-white border-2 border-black px-3 py-2 font-bold focus:outline-none">
+            </div>
+
+            <div class="mb-8 bg-black text-white p-4 flex justify-between items-center">
+                <span class="font-bold uppercase text-sm">Total:</span>
+                <span class="font-black text-xl">{{ formatPrice(totalPrice) }}</span>
+            </div>
+
+            <div class="flex gap-4">
+                <button @click="closePaymentModal" class="flex-1 bg-white border-2 border-black text-black font-bold py-3 uppercase text-sm hover:bg-gray-100 transition-colors">Batal</button>
+                <button @click="processPayment" class="flex-1 bg-black border-2 border-black text-white font-bold py-3 uppercase text-sm hover:bg-white hover:text-black transition-colors">Proses</button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="showLoginModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-70 px-4">
+        <div class="bg-white rounded-lg w-full max-w-md p-8 relative">
+            <button @click="showLoginModal = false" class="absolute top-4 right-4 text-gray-500 hover:text-black font-bold text-xl">✕</button>
+            <h2 class="text-2xl font-bold mb-6 text-center text-black">Login Akun</h2>
+            <form @submit.prevent="login">
+                <div class="mb-6">
+                    <label class="block text-black text-sm font-bold mb-2">Username</label>
+                    <input v-model="loginInput" type="text" required class="w-full border border-gray-300 text-black px-4 py-3 rounded focus:outline-none focus:border-black focus:ring-1 focus:ring-black" placeholder="Masukkan username">
+                </div>
+                <button type="submit" class="w-full bg-black text-white font-bold py-3 rounded hover:bg-gray-800 transition-colors">Masuk</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const { createApp } = Vue;
+    createApp({
+        data() {
+            return {
+                mobileMenuOpen: false,
+                isLoggedIn: false,
+                username: '',
+                showLoginModal: false,
+                loginInput: '',
+                
+                searchQuery: '',
+                selectedBrand: 'All',
+                availableBrands: ['Ducky', 'Varmilo', 'Vortexgear', 'Leopold'],
+                showPaymentModal: false,
+                selectedProduct: null,
+                quantity: 1,
+                products: [
+                    { id: 1, brand: 'Ducky', name: 'Ducky One 3 TKL DayBreak (Cherry MX Red)', price: 1680000, image: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=600&q=80' },
+                    { id: 2, brand: 'Ducky', name: 'Ducky One 2 Mini RGB Cherry MX Brown', price: 1490000, image: 'https://images.unsplash.com/photo-1595044426077-d36d9236d54a?auto=format&fit=crop&w=600&q=80' },
+                    { id: 3, brand: 'Varmilo', name: 'Varmilo VA87M Sakura Edition (LED Pink)', price: 1850000, image: 'https://images.unsplash.com/photo-1601445638532-3c6f6c3aa1d6?auto=format&fit=crop&w=600&q=80' },
+                    { id: 4, brand: 'Varmilo', name: 'Varmilo MA108M Sea Melody Theme', price: 2100000, image: 'https://images-na.ssl-images-amazon.com/images/I/71YIvNE8YTL.jpg' },
+                    { id: 5, brand: 'Vortexgear', name: 'Vortex RACE 3 Dye-Sub PBT Layout 75%', price: 2150000, image: 'https://vortexgear.store/cdn/shop/files/DSC_6857.jpg?v=1704435055&width=1946' },
+                    { id: 6, brand: 'Vortexgear', name: 'Vortex POK3R V2 RGB Ultra Compact 60%', price: 1750000, image: 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&w=600&q=80' },
+                    { id: 7, brand: 'Leopold', name: 'Leopold FC750R PD White Grey Blue', price: 1950000, image: 'https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=600&q=80' },
+                    { id: 8, brand: 'Leopold', name: 'Leopold FC900R PD Ash Yellow Cherry MX', price: 2200000, image: 'data:image/jpeg;base64,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EzwWaTbZGlxYxlxaG9Ikm54kn+KiOMtuE8Hm2suUeL5altQ4A5dModa/Qe3ed3lfgufj12qLjsubmEj1CttOuZzmuH5kd8Lhy6IlLbP7M31iktxLwoO+Zb3woXQz8X2J7WuBh4dy+EMccYiB2bGtBLxvaAL/AILI+i5OUmp958CHiU0rrYaGtx4vqJJwGgyEEgkG3RaCP1brvYKfZqSp7bHMxVHr5uVzoObCqfNjFM+wIbtA4tucoMM1i63k6m2qvXq9Y0xQodUmj6MWAznLcssJ+FWjc94YW6tDiATc7x1oDjHc1VJ1td3lbKUzEW81dIfku7yKJOYHmrpPNd3kyjMV8FNJ5ru8mUjMXYuaOkcL2PeWKU7OxkSurk/A/S8D3lXrOROUeCCl4HvJ1nIZQOZ+l4HvJ1nIZR4H6Tge8nW8hlHgfpe3vJ1oyjwP0vb3j7U60ZS3NzS0jbaO17Srwlm0KtWRA81VJ5ru8smUpnKN5q6Q/Jd3kykuVh4K6Tdld3imUZyvgppPNd3kykZ0UbzV0h+S7vJlDnYo7mtpB8l3eRxsSpXJeCqk813eTKRnKN5q6Q65Xd4pkJzBvNZSHqd3imUZireaukLrWd3jwPsVZfKWjqZA5oaT6Xr/AJrF1nItlK+CGk+l6/5p1gykWc0lIQD0tRx/mnWchlLTuaqkBIs7T6RWaKzK5STsdDyS5MNopWiN7w03JbmOU6HeOtGrBO53KgkxqmHMQUBEwditmKZSLae3UlybA0yZhlJGDsTOMpOKOwtZYpK7Lp2J5exVyk3FuxMouLdiZRcW7Eyi4t2JlFxbsTILluWK9tNyvFWdyHqRMHYsmcplKNp7DcmcZShp9b2TMMpIw9im4ylGwWG5RmGUi+mudyN3CViWw0TMMobBYbkzDKUbT2TMMobT63/rcqS1JirGRl7FTKWuMvYmUm5FjLDcmUXLfwfUlZYuyKNXKxwWcD/XWjdwlYylBIQBAEAQBAEAQBAEAQBAEAQBAEAQFLICqAIBZAEAsgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAIAgCAID//Z' }
+                ]
+            }
+        },
+        computed: {
+            filteredProducts() {
+                return this.products.filter(p => {
+                    const matchesSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+                    const matchesBrand = this.selectedBrand === 'All' || p.brand === this.selectedBrand;
+                    return matchesSearch && matchesBrand;
+                });
+            },
+            totalPrice() {
+                if(!this.selectedProduct) return 0;
+                return this.selectedProduct.price * this.quantity;
+            }
+        },
+        mounted() {
+            const savedUser = localStorage.getItem('arkey_user');
+            if (savedUser) {
+                this.username = savedUser;
+                this.isLoggedIn = true;
+            }
+        },
+        methods: {
+            formatPrice(value) {
+                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
+            },
+            login() {
+                if (this.loginInput.trim() !== '') {
+                    localStorage.setItem('arkey_user', this.loginInput);
+                    this.username = this.loginInput;
+                    this.isLoggedIn = true;
+                    this.showLoginModal = false;
+                    this.loginInput = '';
+                }
+            },
+            logout() {
+                localStorage.removeItem('arkey_user');
+                this.username = '';
+                this.isLoggedIn = false;
+            },
+            openModal(product) {
+                this.selectedProduct = product;
+                this.quantity = 1;
+                this.showPaymentModal = true;
+            },
+            closePaymentModal() {
+                this.showPaymentModal = false;
+                setTimeout(() => { this.selectedProduct = null; }, 300);
+            },
+            processPayment() {
+                if(this.quantity < 1) {
+                    alert('Jumlah harus minimal 1');
+                    return;
+                }
+                alert('Pesanan untuk ' + this.selectedProduct.name + ' sejumlah ' + this.quantity + ' berhasil diproses!');
+                this.showPaymentModal = false;
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
